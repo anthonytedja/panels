@@ -112,8 +112,8 @@ export default function Index() {
   };
 
   return (
-    <div className="grid grid-rows-[0px_1fr_0px] items-center justify-items-center min-h-screen sm:p-10">
-      <main className="flex flex-col row-start-2 items-center sm:items-start">
+    <div className="flex justify-center items-center min-h-dvh">
+      <main className="flex flex-col justify-center max-w-screen-lg">
         {!hidden && (
           <>
             <input
@@ -132,15 +132,17 @@ export default function Index() {
                 inputRef.current?.click();
               }}
             >
-              {loading ? <Loader2 className="animate-spin" /> : "Select File"}
+              {loading ? (
+                <Loader2 className="animate-spin [&&]:w-6 [&&]:h-6" />
+              ) : (
+                "Select File"
+              )}
             </Button>
           </>
         )}
         <div
           id="images"
-          className={`flex flex-col justify-center max-w-screen-lg gap-0.5 ${
-            !hidden ? "hidden" : ""
-          } `}
+          className={`flex flex-col gap-0.5 ${!hidden ? "hidden" : ""}`}
         ></div>
       </main>
     </div>
