@@ -3,46 +3,68 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+
 export default function Index() {
   const workerRef = useRef<Worker>();
   const inputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(true);
   const [hidden, setHidden] = useState(false);
 
-  type UncompressMessage = {
-    action: "uncompress_each" | "error" | "ready";
-    file_name: string;
-    url: string;
-    index: number;
-    size: number;
-  };
+  type UncompressMessage =
+    | {
+        action: "uncompress";
+        url: string;
+        index: number;
+        total: number;
+      }
+    | {
+        action: "error";
+        message: string;
+      }
+    | {
+        action: "ready";
+      };
 
   useEffect(() => {
+    const images = document.getElementById("images");
+    if (!images) return;
+
     workerRef.current = new Worker(
       new URL("../lib/worker.js", import.meta.url)
     );
+
     workerRef.current.onmessage = (e: MessageEvent<UncompressMessage>) => {
       switch (e.data.action) {
-        case "uncompress_each":
-          const file_name = e.data.file_name;
+        case "uncompress":
           const url = e.data.url;
           const index = e.data.index;
 
-          // add the image to the page
           const img = document.createElement("img");
+          const id = `image-${index}`;
+          img.id = id;
+          img.alt = id;
           img.src = url;
-          img.alt = file_name;
-          img.id = `image-${index}`;
+
+          // TODO: Make Dynamic
+          img.width = 2200;
+          img.height = 3200;
+
           if (index > 3) {
             img.loading = "lazy";
+          } else if (index === 1) {
+            setHidden(true);
+            setLoading(false);
           }
 
-          const images = document.getElementById("images");
-          img.classList.add("w-full");
           images?.appendChild(img);
           break;
+
         case "error":
+          toast.error(e.data.message);
           break;
+
         case "ready":
           setLoading(false);
           break;
@@ -63,9 +85,11 @@ export default function Index() {
     }
 
     if (![".cbr", ".cbz", ".cbt"].includes(file.name.slice(-4))) {
-      alert("Invalid file type");
+      toast.error("Invalid File Type");
       return;
     }
+
+    setLoading(true);
 
     const blob = file.slice();
     const file_name = file.name;
@@ -77,7 +101,7 @@ export default function Index() {
 
       // Send the file name and array buffer to the web worker
       const message = {
-        action: "uncompress_start",
+        action: "start",
         file_name: file_name,
         array_buffer: array_buffer,
       };
@@ -85,35 +109,36 @@ export default function Index() {
       workerRef.current?.postMessage(message);
     };
     reader.readAsArrayBuffer(blob);
-
-    setHidden(true);
   };
 
   return (
-    <div className="grid grid-rows-[0px_1fr_0px] items-center justify-items-center min-h-screen p-1 sm:p-10 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <input
-          type="file"
-          tabIndex={-1}
-          ref={inputRef}
-          onChange={onFileSelected}
-          accept=".cbr,.cbz,.cbt"
-          hidden
-        />
-        <Button
-          disabled={loading}
-          variant="outline"
-          className={hidden ? "hidden" : ""}
-          onClick={(e) => {
-            e.stopPropagation();
-            inputRef.current?.click();
-          }}
-        >
-          Select File
-        </Button>
+    <div className="grid grid-rows-[0px_1fr_0px] items-center justify-items-center min-h-screen sm:p-10">
+      <main className="flex flex-col row-start-2 items-center sm:items-start">
+        {!hidden && (
+          <>
+            <input
+              type="file"
+              tabIndex={-1}
+              ref={inputRef}
+              onChange={onFileSelected}
+              accept=".cbr,.cbz,.cbt"
+              hidden
+            />
+            <Button
+              disabled={loading}
+              variant="outline"
+              onClick={(e) => {
+                e.stopPropagation();
+                inputRef.current?.click();
+              }}
+            >
+              {loading ? <Loader2 className="animate-spin" /> : "Select File"}
+            </Button>
+          </>
+        )}
         <div
           id="images"
-          className={`flex flex-col justify-center max-w-screen-lg gap-1 ${
+          className={`flex flex-col justify-center max-w-screen-lg gap-0.5 ${
             !hidden ? "hidden" : ""
           } `}
         ></div>
