@@ -21,7 +21,7 @@ export default function Index() {
       }
     | {
         action: "error";
-        message: string;
+        error: string;
       }
     | {
         action: "ready";
@@ -62,7 +62,7 @@ export default function Index() {
           break;
 
         case "error":
-          toast.error(e.data.message);
+          toast.error(e.data.error);
           break;
 
         case "ready":
