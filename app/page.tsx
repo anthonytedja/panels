@@ -107,9 +107,19 @@ export default function Page() {
 
   return (
     <div className="flex justify-center items-center min-h-dvh">
-      <main className="flex flex-col justify-center max-w-screen-lg">
+      <main className="flex flex-col justify-center text-center max-w-screen-lg">
         {!hidden && (
-          <>
+          <div className="flex flex-col items-center p-6">
+            <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
+              Panels
+            </h1>
+            <p className="leading-7 [&:not(:first-child)]:mt-6">
+              A lightweight{" "}
+              <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold">
+                .cbr/.cbz/.cbt
+              </code>{" "}
+              file reader.
+            </p>
             <input
               type="file"
               tabIndex={-1}
@@ -120,7 +130,7 @@ export default function Page() {
             />
             <Button
               disabled={loading}
-              {...(loading && { className: "px-2" })}
+              className={`mt-6 ${loading && "px-2"}`}
               onClick={(e) => {
                 e.stopPropagation();
                 inputRef.current?.click();
@@ -132,12 +142,17 @@ export default function Page() {
                 "Select File"
               )}
             </Button>
-          </>
+          </div>
         )}
         <div
           id="images"
           className={`flex flex-col ${!hidden ? "hidden" : ""}`}
         ></div>
+        {hidden && (
+          <div className="flex justify-center my-10">
+            <Button onClick={() => window.location.reload()}>Reset</Button>
+          </div>
+        )}
       </main>
     </div>
   );
