@@ -6,31 +6,29 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
-export default function Index() {
+type UncompressMessage =
+  | {
+      action: "uncompress";
+      url: string;
+      index: number;
+      total: number;
+    }
+  | {
+      action: "error";
+      error: string;
+    }
+  | {
+      action: "ready";
+    };
+
+export default function Page() {
   const workerRef = useRef<Worker>();
   const inputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(true);
   const [hidden, setHidden] = useState(false);
 
-  type UncompressMessage =
-    | {
-        action: "uncompress";
-        url: string;
-        index: number;
-        total: number;
-      }
-    | {
-        action: "error";
-        error: string;
-      }
-    | {
-        action: "ready";
-      };
-
   useEffect(() => {
     const images = document.getElementById("images");
-    if (!images) return;
-
     workerRef.current = new Worker(
       new URL("../lib/worker.js", import.meta.url)
     );
@@ -46,6 +44,7 @@ export default function Index() {
           img.id = id;
           img.alt = id;
           img.src = url;
+          img.style.order = index.toString();
 
           // TODO: Make Dynamic
           img.width = 2200;
@@ -76,8 +75,7 @@ export default function Index() {
   }, []);
 
   const onFileSelected = async (e: React.FormEvent<HTMLInputElement>) => {
-    if (!e.currentTarget?.files) return;
-    const file = e.currentTarget.files[0];
+    const file = e.currentTarget?.files?.[0];
     if (!file) return;
 
     if (inputRef.current) {
@@ -91,24 +89,21 @@ export default function Index() {
 
     setLoading(true);
 
-    const blob = file.slice();
-    const file_name = file.name;
-
-    // Convert the blob into an array buffer
     const reader = new FileReader();
+    reader.readAsArrayBuffer(file.slice());
     reader.onload = function () {
-      const array_buffer = reader.result;
-
-      // Send the file name and array buffer to the web worker
-      const message = {
-        action: "start",
-        file_name: file_name,
-        array_buffer: array_buffer,
-      };
-
-      workerRef.current?.postMessage(message);
+      workerRef.current?.postMessage(
+        {
+          action: "start",
+          file_name: file.name,
+          array_buffer: reader.result,
+        },
+        [reader.result as ArrayBuffer]
+      );
     };
-    reader.readAsArrayBuffer(blob);
+    reader.onerror = function () {
+      toast.error("Error Reading File");
+    };
   };
 
   return (
