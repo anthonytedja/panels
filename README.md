@@ -10,3 +10,4 @@
 ## Features
 
 - ZIP/RAR/TAR uncompress with [uncompress.js](https://github.com/workhorsy/uncompress.js)
+- Image Lazy Loading

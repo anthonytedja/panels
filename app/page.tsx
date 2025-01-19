@@ -11,7 +11,8 @@ type UncompressMessage =
       action: "uncompress";
       url: string;
       index: number;
-      total: number;
+      width: number;
+      height: number;
     }
   | {
       action: "error";
@@ -44,11 +45,9 @@ export default function Page() {
           img.id = id;
           img.alt = id;
           img.src = url;
+          img.width = e.data.width;
+          img.height = e.data.height;
           img.style.order = index.toString();
-
-          // TODO: Make Dynamic
-          img.width = 2200;
-          img.height = 3200;
 
           if (index > 3) {
             img.loading = "lazy";
@@ -121,7 +120,7 @@ export default function Page() {
             />
             <Button
               disabled={loading}
-              variant="outline"
+              {...(loading && { className: "px-2" })}
               onClick={(e) => {
                 e.stopPropagation();
                 inputRef.current?.click();
@@ -137,7 +136,7 @@ export default function Page() {
         )}
         <div
           id="images"
-          className={`flex flex-col gap-0.5 ${!hidden ? "hidden" : ""}`}
+          className={`flex flex-col ${!hidden ? "hidden" : ""}`}
         ></div>
       </main>
     </div>
