@@ -89,7 +89,7 @@ export default function Page() {
     setLoading(true);
 
     const reader = new FileReader();
-    reader.readAsArrayBuffer(file.slice());
+    reader.readAsArrayBuffer(file);
     reader.onload = function () {
       workerRef.current?.postMessage(
         {
