@@ -6,8 +6,15 @@ const withSerwist = withSerwistInit({
   swSrc: "app/sw.ts",
   swDest: "public/sw.js",
   cacheOnNavigation: true,
-  include: [/\.(js|css|json)$/],
-  additionalPrecacheEntries: [{ url: "/", revision }],
+  include: [/\.(ico|js|css|woff|json)$/],
+  additionalPrecacheEntries: [
+    { url: "/", revision },
+    { url: "/jszip.js", revision },
+    { url: "/libunrar.js", revision },
+    { url: "/libunrar.js.mem", revision },
+    { url: "/libuntar.js", revision },
+    { url: "/uncompress.js", revision },
+  ],
 });
 
 /** @type {import('next').NextConfig} */
