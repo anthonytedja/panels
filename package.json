@@ -14,6 +14,7 @@
     "@radix-ui/react-slot": "^1.1.1",
     "@radix-ui/react-switch": "^1.1.2",
     "@radix-ui/react-tooltip": "^1.1.6",
+    "@serwist/next": "^9.0.11",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "image-dimensions": "^2.3.0",
@@ -33,6 +34,7 @@
     "eslint": "^8",
     "eslint-config-next": "14.2.16",
     "postcss": "^8",
+    "serwist": "^9.0.11",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
   }

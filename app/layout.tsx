@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
@@ -18,6 +18,25 @@ const geistSans = localFont({
 export const metadata: Metadata = {
   title: "Panels",
   description: "Lightweight Web-based CBR/CBZ/CBT Reader",
+  applicationName: "Panels",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black",
+    title: "Panels",
+    startupImage: "/favicon.ico",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  openGraph: {
+    type: "website",
+    siteName: "Panels",
+    description: "Lightweight Web-based CBR/CBZ/CBT Reader",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#000000",
 };
 
 export default function RootLayout({
