@@ -17,7 +17,7 @@ const geistSans = localFont({
 
 export const metadata: Metadata = {
   title: "Panels",
-  description: "Lightweight Web-based CBR/CBZ/CBT Reader",
+  description: "A lightweight Web App CBR/CBZ/CBT Reader",
   applicationName: "Panels",
   appleWebApp: {
     capable: true,
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "Panels",
-    description: "Lightweight Web-based CBR/CBZ/CBT Reader",
+    description: "A Lightweight Web App CBR/CBZ/CBT Reader",
   },
 };
 
@@ -49,7 +49,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} antialiased font-[family-name:var(--font-geist-sans)]`}
       >
-        <Toaster theme="light" richColors swipeDirections={["left", "right"]} />
+        <Toaster richColors swipeDirections={["left", "right"]} />
         {children}
       </body>
     </html>
