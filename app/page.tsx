@@ -76,7 +76,7 @@ export default function Page() {
           }
 
           images?.appendChild(img);
-          if (index === e.data.total) {
+          if (index === e.data.total && !ios) {
             setEnableScrollSpy(true);
           }
           break;
@@ -261,12 +261,19 @@ export default function Page() {
       {!hidden && (
         <div className="fixed top-4 right-4">
           <Link
+            tabIndex={-1}
+            aria-label="GitHub"
             href="https://github.com/anthonytedja/panels"
             passHref
             target="_blank"
             rel="noopener noreferrer"
+            className="rounded-full"
           >
-            <Button className="px-3 rounded-full">
+            <Button
+              title="GitHub"
+              variant="secondary"
+              className="px-3 rounded-full"
+            >
               <Github />
             </Button>
           </Link>
