@@ -1,9 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import PWAPrompt from "@/components/toast/pwa";
-import { LoaderCircle } from "lucide-react";
+import { Github, LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 
 type UncompressMessage =
@@ -135,7 +136,7 @@ export default function Page() {
       const imageElements = document.querySelectorAll("#images img");
       let newActiveImage = activeImage;
 
-      if (e.key === "ArrowDown" || e.key === "ArrowRight") {
+      if (e.key === "ArrowDown" || e.key === " ") {
         e.preventDefault();
         if (activeImage === imageElements.length) {
           window.scrollTo({
@@ -145,7 +146,7 @@ export default function Page() {
           return;
         }
         newActiveImage = Math.min(activeImage + 1, imageElements.length);
-      } else if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+      } else if (e.key === "ArrowUp") {
         e.preventDefault();
         newActiveImage = Math.max(activeImage - 1, 1);
       }
@@ -255,6 +256,20 @@ export default function Page() {
       {hidden && (
         <div className="flex justify-center mt-8 mb-11">
           <Button onClick={onReset}>Open New File</Button>
+        </div>
+      )}
+      {!hidden && (
+        <div className="fixed top-4 right-4">
+          <Link
+            href="https://github.com/anthonytedja/panels"
+            passHref
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Button className="px-3 rounded-full">
+              <Github />
+            </Button>
+          </Link>
         </div>
       )}
     </>
