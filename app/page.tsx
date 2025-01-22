@@ -13,6 +13,7 @@ type UncompressMessage =
       index: number;
       width: number;
       height: number;
+      total: number;
     }
   | {
       action: "error";
@@ -28,6 +29,8 @@ export default function Page() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(true);
   const [hidden, setHidden] = useState(false);
+  const [activeImage, setActiveImage] = useState<number | null>(null);
+  const [enableScrollSpy, setEnableScrollSpy] = useState(false);
 
   useEffect(() => {
     const ios =
@@ -62,7 +65,7 @@ export default function Page() {
           img.src = url;
           img.width = e.data.width;
           img.height = e.data.height;
-          // img.style.order = index.toString();
+          img.style.order = index.toString();
 
           if (index > 3) {
             img.loading = "lazy";
@@ -72,10 +75,14 @@ export default function Page() {
           }
 
           images?.appendChild(img);
+          if (index === e.data.total) {
+            setEnableScrollSpy(true);
+          }
           break;
 
         case "error":
           toast.error(e.data.error);
+          setLoading(false);
           break;
 
         case "ready":
@@ -83,10 +90,80 @@ export default function Page() {
           break;
       }
     };
+
     return () => {
       workerRef.current?.terminate();
     };
   }, []);
+
+  useEffect(() => {
+    if (!enableScrollSpy) return;
+
+    const observe = () => {
+      const imageElements = document.querySelectorAll("#images img");
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setActiveImage(
+                parseInt((entry.target as HTMLElement).style.order)
+              );
+            }
+          });
+        },
+        {
+          rootMargin: "-1px 0px -100% 0px",
+        }
+      );
+
+      imageElements.forEach((img) => {
+        observer.observe(img);
+      });
+
+      return () => {
+        observer.disconnect();
+      };
+    };
+
+    observe();
+  }, [enableScrollSpy]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (activeImage === null || !enableScrollSpy) return;
+
+      const imageElements = document.querySelectorAll("#images img");
+      let newActiveImage = activeImage;
+
+      if (e.key === "ArrowDown" || e.key === "ArrowRight") {
+        e.preventDefault();
+        if (activeImage === imageElements.length) {
+          window.scrollTo({
+            top: document.body.scrollHeight,
+            behavior: "smooth",
+          });
+          return;
+        }
+        newActiveImage = Math.min(activeImage + 1, imageElements.length);
+      } else if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+        e.preventDefault();
+        newActiveImage = Math.max(activeImage - 1, 1);
+      }
+
+      const newActiveImageId = `image-${newActiveImage}`;
+      const newActiveImageElement = document.getElementById(newActiveImageId);
+
+      if (newActiveImageElement) {
+        setActiveImage(newActiveImage);
+        newActiveImageElement.scrollIntoView({ behavior: "smooth" });
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [activeImage, enableScrollSpy]);
 
   const onFileSelected = async (e: React.FormEvent<HTMLInputElement>) => {
     const file = e.currentTarget?.files?.[0];
@@ -128,6 +205,8 @@ export default function Page() {
     }
     images.innerHTML = "";
     setHidden(false);
+    setEnableScrollSpy(false);
+    setActiveImage(null);
     inputRef.current?.click();
   };
 
