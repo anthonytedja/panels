@@ -128,10 +128,19 @@ export default function Page() {
     }
     images.innerHTML = "";
     setHidden(false);
+    inputRef.current?.click();
   };
 
   return (
     <>
+      <input
+        type="file"
+        tabIndex={-1}
+        ref={inputRef}
+        onChange={onFileSelected}
+        accept=".cbr,.cbz,.cbt"
+        hidden
+      />
       {!hidden && (
         <div className="flex flex-col items-center p-6">
           <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
@@ -144,14 +153,6 @@ export default function Page() {
             </code>{" "}
             file reader.
           </p>
-          <input
-            type="file"
-            tabIndex={-1}
-            ref={inputRef}
-            onChange={onFileSelected}
-            accept=".cbr,.cbz,.cbt"
-            hidden
-          />
           <Button
             disabled={loading}
             className={`mt-6 ${loading && "px-2"}`}
@@ -163,7 +164,7 @@ export default function Page() {
             {loading ? (
               <LoaderCircle className="animate-spin [&&]:w-6 [&&]:h-6" />
             ) : (
-              "Select File"
+              "Open File"
             )}
           </Button>
         </div>
@@ -173,8 +174,8 @@ export default function Page() {
         className={`flex flex-col ${!hidden ? "hidden" : ""}`}
       ></div>
       {hidden && (
-        <div className="flex justify-center my-10">
-          <Button onClick={onReset}>Reset</Button>
+        <div className="flex justify-center mt-8 mb-11">
+          <Button onClick={onReset}>Open New File</Button>
         </div>
       )}
     </>
