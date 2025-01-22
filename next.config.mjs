@@ -6,7 +6,7 @@ const withSerwist = withSerwistInit({
   swSrc: "app/sw.ts",
   swDest: "public/sw.js",
   cacheOnNavigation: true,
-  include: [/\.(ico|js|css|woff|json)$/],
+  include: [/\.(ico|js|css|json)$/],
   additionalPrecacheEntries: [
     { url: "/", revision },
     { url: "/jszip.js", revision },
@@ -26,7 +26,7 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: "/:all*(gif|svg|jpg|jpeg|png|webp|woff|woff2)",
+        source: "/:all*(ico|gif|svg|jpg|jpeg|png|webp)",
         headers: [
           {
             key: "Cache-Control",

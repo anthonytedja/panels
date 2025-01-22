@@ -1,19 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import localFont from "next/font/local";
-import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-
-// const geistMono = localFont({
-//   src: "./fonts/GeistMonoVF.woff",
-//   variable: "--font-geist-mono",
-//   weight: "100 900",
-// });
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Panels",
@@ -46,11 +34,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body
-        className={`${geistSans.variable} antialiased font-[family-name:var(--font-geist-sans)]`}
-      >
+      <body className="antialiased">
         <Toaster richColors swipeDirections={["left", "right"]} />
-        {children}
+        <div className="flex justify-center items-center min-h-dvh">
+          <main className="flex flex-col justify-center text-center w-full max-w-screen-xl">
+            {children}
+          </main>
+        </div>
       </body>
     </html>
   );
