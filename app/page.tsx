@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
 import PWAPrompt from "@/components/toast/pwa";
 import { Github, LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
@@ -31,6 +32,7 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [hidden, setHidden] = useState(false);
   const [activeImage, setActiveImage] = useState<number | null>(null);
+  const [total, setTotal] = useState(0);
   const [enableScrollSpy, setEnableScrollSpy] = useState(false);
 
   useEffect(() => {
@@ -78,6 +80,7 @@ export default function Page() {
           images?.appendChild(img);
           if (index === e.data.total && !ios) {
             setEnableScrollSpy(true);
+            setTotal(e.data.total);
           }
           break;
 
@@ -138,13 +141,6 @@ export default function Page() {
 
       if (e.key === "ArrowDown" || e.key === " ") {
         e.preventDefault();
-        if (activeImage === imageElements.length) {
-          window.scrollTo({
-            top: document.body.scrollHeight,
-            behavior: "smooth",
-          });
-          return;
-        }
         newActiveImage = Math.min(activeImage + 1, imageElements.length);
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
@@ -156,7 +152,7 @@ export default function Page() {
 
       if (newActiveImageElement) {
         setActiveImage(newActiveImage);
-        newActiveImageElement.scrollIntoView({ behavior: "smooth" });
+        newActiveImageElement.scrollIntoView();
       }
     };
 
@@ -207,6 +203,7 @@ export default function Page() {
     images.innerHTML = "";
     setHidden(false);
     setEnableScrollSpy(false);
+    setTotal(0);
     setActiveImage(null);
     inputRef.current?.click();
   };
@@ -221,6 +218,29 @@ export default function Page() {
         accept=".cbr,.cbz,.cbt"
         hidden
       />
+      <div
+        className={`fixed max-w-screen-xl flex w-full p-4 bottom-0 backdrop-blur supports-\[backdrop-filter\]\:bg-background\/60 animate-in transition duration-500 ${
+          activeImage === null || total === 0
+            ? "opacity-0 invisible absolute z-[-1]"
+            : "visible"
+        }`}
+      >
+        <Slider
+          step={1}
+          min={1}
+          max={total}
+          value={[activeImage ?? 1]}
+          onValueChange={(value) => {
+            setActiveImage(value[0]);
+            const newActiveImageId = `image-${value[0]}`;
+            const newActiveImageElement =
+              document.getElementById(newActiveImageId);
+            if (newActiveImageElement) {
+              newActiveImageElement.scrollIntoView(true);
+            }
+          }}
+        />
+      </div>
       {!hidden && (
         <div className="flex flex-col items-center p-6">
           <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
@@ -254,7 +274,7 @@ export default function Page() {
         className={`flex flex-col ${!hidden ? "hidden" : ""}`}
       ></div>
       {hidden && (
-        <div className="flex justify-center mt-8 mb-11">
+        <div className="flex justify-center mt-8 mb-12">
           <Button onClick={onReset}>Open New File</Button>
         </div>
       )}
