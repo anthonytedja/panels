@@ -218,29 +218,6 @@ export default function Page() {
         accept=".cbr,.cbz,.cbt"
         hidden
       />
-      <div
-        className={`fixed max-w-screen-xl flex w-full p-4 bottom-0 backdrop-blur supports-\[backdrop-filter\]\:bg-background\/60 animate-in transition duration-500 ${
-          activeImage === null || total === 0
-            ? "opacity-0 invisible absolute z-[-1]"
-            : "visible"
-        }`}
-      >
-        <Slider
-          step={1}
-          min={1}
-          max={total}
-          value={[activeImage ?? 1]}
-          onValueChange={(value) => {
-            setActiveImage(value[0]);
-            const newActiveImageId = `image-${value[0]}`;
-            const newActiveImageElement =
-              document.getElementById(newActiveImageId);
-            if (newActiveImageElement) {
-              newActiveImageElement.scrollIntoView(true);
-            }
-          }}
-        />
-      </div>
       {!hidden && (
         <div className="flex flex-col items-center p-6">
           <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
@@ -273,11 +250,6 @@ export default function Page() {
         id="images"
         className={`flex flex-col ${!hidden ? "hidden" : ""}`}
       ></div>
-      {hidden && (
-        <div className="flex justify-center mt-8 mb-12">
-          <Button onClick={onReset}>Open New File</Button>
-        </div>
-      )}
       {!hidden && (
         <div className="fixed top-4 right-4">
           <Link
@@ -297,6 +269,34 @@ export default function Page() {
               <Github />
             </Button>
           </Link>
+        </div>
+      )}
+      <div
+        className={`fixed max-w-screen-xl flex w-full p-4 bottom-0 backdrop-blur supports-\[backdrop-filter\]\:bg-background\/60 animate-in transition duration-500 ${
+          activeImage === null || total === 0
+            ? "opacity-0 invisible absolute z-[-1]"
+            : "visible"
+        }`}
+      >
+        <Slider
+          step={1}
+          min={1}
+          max={total}
+          value={[activeImage ?? 1]}
+          onValueChange={(value) => {
+            setActiveImage(value[0]);
+            const newActiveImageId = `image-${value[0]}`;
+            const newActiveImageElement =
+              document.getElementById(newActiveImageId);
+            if (newActiveImageElement) {
+              newActiveImageElement.scrollIntoView(true);
+            }
+          }}
+        />
+      </div>
+      {hidden && (
+        <div className="flex justify-center mt-8 mb-12">
+          <Button onClick={onReset}>Open New File</Button>
         </div>
       )}
     </>
