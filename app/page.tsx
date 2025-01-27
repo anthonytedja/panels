@@ -25,6 +25,7 @@ export default function Page() {
   const [fileName, setFileName] = useState("");
   const [store, setStore] = useLocalStorage<Store>("panels-config", {
     enableSlider: false,
+    unboundedWidth: false,
   });
 
   useEffect(() => {
@@ -201,7 +202,11 @@ export default function Page() {
   };
 
   return (
-    <>
+    <main
+      className={`flex flex-col justify-center text-center w-full transition-all duration-500 ${
+        store.unboundedWidth ? "max-w-full" : "max-w-screen-xl"
+      }`}
+    >
       <input
         type="file"
         tabIndex={-1}
@@ -271,11 +276,11 @@ export default function Page() {
         )}
       </div>
       <div
-        className={`fixed max-w-screen-xl flex w-full py-4 px-1.5 top-0 backdrop-blur supports-\[backdrop-filter\]\:bg-background\/60 animate-in animate-out transition duration-500 ${
+        className={`fixed flex w-full py-4 px-1.5 top-0 backdrop-blur supports-\[backdrop-filter\]\:bg-background\/60 transition-all duration-500 ${
           !store.enableSlider || activeImage === null || total === 0
-            ? "opacity-0 invisible z-[-1]"
+            ? "opacity-0 invisible"
             : "opacity-100 visible"
-        }`}
+        } ${store.unboundedWidth ? "max-w-full" : "max-w-screen-xl"}`}
       >
         <Slider
           step={1}
@@ -308,6 +313,6 @@ export default function Page() {
           </div>
         </>
       )}
-    </>
+    </main>
   );
 }

@@ -33,9 +33,9 @@ type Props = {
 export default function SettingsModal(props: Props) {
   const { name, store, setStore, reset } = props;
   const [open, setOpen] = useState(false);
-  const isDesktop = useMediaQuery("(min-width: 672px)");
+  const md = useMediaQuery("(min-width: 672px)");
 
-  if (isDesktop) {
+  if (md) {
     return (
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
@@ -87,21 +87,36 @@ export default function SettingsModal(props: Props) {
 
 function Body(props: Props & React.ComponentProps<"div">) {
   const { store, setStore, reset, className } = props;
+  const xl = useMediaQuery("(min-width: 1280px)");
 
   return (
     <div className={cn("flex flex-col gap-4 pt-2", className)}>
       <div className="flex justify-between items-center gap-4">
-        <Label htmlFor="slider" className="w-full">
+        <Label htmlFor="enable-slider" className="w-full cursor-pointer">
           Page Progress Slider
         </Label>
         <Switch
-          id="slider"
+          id="enable-slider"
           checked={store.enableSlider}
           onCheckedChange={() => {
             setStore({ ...store, enableSlider: !store.enableSlider });
           }}
         />
       </div>
+      {xl && (
+        <div className="flex justify-between items-center gap-4">
+          <Label htmlFor="limit-width" className="w-full cursor-pointer">
+            Unlimit Image Width
+          </Label>
+          <Switch
+            id="limit-width"
+            checked={store.unboundedWidth}
+            onCheckedChange={() => {
+              setStore({ ...store, unboundedWidth: !store.unboundedWidth });
+            }}
+          />
+        </div>
+      )}
       <Button onClick={reset} variant="secondary" className="mt-2">
         Open New File
       </Button>

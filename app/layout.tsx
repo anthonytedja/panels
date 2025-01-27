@@ -37,9 +37,7 @@ export default function RootLayout({
       <body className="antialiased">
         <Toaster richColors swipeDirections={["left", "right"]} />
         <div className="flex justify-center items-center min-h-dvh">
-          <main className="flex flex-col justify-center text-center w-full max-w-screen-xl">
-            {children}
-          </main>
+          {children}
         </div>
       </body>
     </html>

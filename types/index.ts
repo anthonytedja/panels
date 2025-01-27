@@ -15,6 +15,8 @@ export type UncompressMessage =
       action: "ready";
     };
 
+// Default false when adding new properties
 export type Store = {
-  enableSlider: boolean;
+  enableSlider?: boolean; // Page Progress Slider
+  unboundedWidth?: boolean; // Limit Image Width
 };
