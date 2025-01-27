@@ -32,8 +32,10 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [hidden, setHidden] = useState(false);
   const [activeImage, setActiveImage] = useState<number | null>(null);
+  const [sliderValue, setSliderValue] = useState(1);
   const [total, setTotal] = useState(0);
   const [enableScrollSpy, setEnableScrollSpy] = useState(false);
+  const [fileName, setFileName] = useState("");
 
   useEffect(() => {
     const ios =
@@ -78,7 +80,7 @@ export default function Page() {
           }
 
           images?.appendChild(img);
-          if (index === e.data.total && !ios) {
+          if (index === e.data.total) {
             setEnableScrollSpy(true);
             setTotal(e.data.total);
           }
@@ -103,33 +105,29 @@ export default function Page() {
   useEffect(() => {
     if (!enableScrollSpy) return;
 
-    const observe = () => {
-      const imageElements = document.querySelectorAll("#images img");
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              setActiveImage(
-                parseInt((entry.target as HTMLElement).style.order)
-              );
-            }
-          });
-        },
-        {
-          rootMargin: "-1px 0px -100% 0px",
-        }
-      );
+    const imageElements = document.querySelectorAll("#images img");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const value = parseInt((entry.target as HTMLElement).style.order);
+            setSliderValue(value);
+            setActiveImage(value);
+          }
+        });
+      },
+      {
+        rootMargin: "-1px 0px -99% 0px", // -1px Workaround, -100% Breaks Safari
+      }
+    );
 
-      imageElements.forEach((img) => {
-        observer.observe(img);
-      });
+    imageElements.forEach((img) => {
+      observer.observe(img);
+    });
 
-      return () => {
-        observer.disconnect();
-      };
+    return () => {
+      observer?.disconnect();
     };
-
-    observe();
   }, [enableScrollSpy]);
 
   useEffect(() => {
@@ -151,6 +149,7 @@ export default function Page() {
       const newActiveImageElement = document.getElementById(newActiveImageId);
 
       if (newActiveImageElement) {
+        setSliderValue(newActiveImage);
         setActiveImage(newActiveImage);
         newActiveImageElement.scrollIntoView();
       }
@@ -176,6 +175,7 @@ export default function Page() {
     }
 
     setLoading(true);
+    setFileName(file.name);
 
     const reader = new FileReader();
     reader.readAsArrayBuffer(file);
@@ -204,6 +204,8 @@ export default function Page() {
     setHidden(false);
     setEnableScrollSpy(false);
     setTotal(0);
+    setFileName("");
+    setSliderValue(1);
     setActiveImage(null);
     inputRef.current?.click();
   };
@@ -272,7 +274,7 @@ export default function Page() {
         </div>
       )}
       <div
-        className={`fixed max-w-screen-xl flex w-full p-4 bottom-0 backdrop-blur supports-\[backdrop-filter\]\:bg-background\/60 animate-in transition duration-500 ${
+        className={`fixed max-w-screen-xl flex w-full py-4 px-1.5 top-0 backdrop-blur supports-\[backdrop-filter\]\:bg-background\/60 animate-in transition duration-500 ${
           activeImage === null || total === 0
             ? "opacity-0 invisible absolute z-[-1]"
             : "visible"
@@ -282,22 +284,32 @@ export default function Page() {
           step={1}
           min={1}
           max={total}
-          value={[activeImage ?? 1]}
+          value={[sliderValue]}
           onValueChange={(value) => {
+            setSliderValue(value[0]);
+          }}
+          onValueCommit={(value) => {
             setActiveImage(value[0]);
             const newActiveImageId = `image-${value[0]}`;
             const newActiveImageElement =
               document.getElementById(newActiveImageId);
             if (newActiveImageElement) {
-              newActiveImageElement.scrollIntoView(true);
+              newActiveImageElement.scrollIntoView();
             }
           }}
         />
       </div>
       {hidden && (
-        <div className="flex justify-center mt-8 mb-12">
-          <Button onClick={onReset}>Open New File</Button>
-        </div>
+        <>
+          <div className="flex justify-center break-words">
+            <p className="text-xs bg-muted py-2 px-3 mx-2 border-[1px] border-t-0 border-primary/25 rounded-b-lg">
+              {fileName}
+            </p>
+          </div>
+          <div className="flex justify-center mt-8 mb-12">
+            <Button onClick={onReset}>Open New File</Button>
+          </div>
+        </>
       )}
     </>
   );
