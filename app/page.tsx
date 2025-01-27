@@ -5,25 +5,12 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import PWAPrompt from "@/components/toast/pwa";
+import SettingsModal from "@/components/settings";
 import { Github, LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 
-type UncompressMessage =
-  | {
-      action: "uncompress";
-      url: string;
-      index: number;
-      width: number;
-      height: number;
-      total: number;
-    }
-  | {
-      action: "error";
-      error: string;
-    }
-  | {
-      action: "ready";
-    };
+import useLocalStorage from "@/hooks/localstorage";
+import { Store, UncompressMessage } from "@/types";
 
 export default function Page() {
   const initialized = useRef(false);
@@ -36,6 +23,9 @@ export default function Page() {
   const [total, setTotal] = useState(0);
   const [enableScrollSpy, setEnableScrollSpy] = useState(false);
   const [fileName, setFileName] = useState("");
+  const [store, setStore] = useLocalStorage<Store>("panels-config", {
+    enableSlider: false,
+  });
 
   useEffect(() => {
     const ios =
@@ -252,8 +242,15 @@ export default function Page() {
         id="images"
         className={`flex flex-col ${!hidden ? "hidden" : ""}`}
       ></div>
-      {!hidden && (
-        <div className="fixed top-4 right-4">
+      <div className="fixed bottom-4 right-4">
+        {hidden ? (
+          <SettingsModal
+            name={fileName}
+            store={store}
+            setStore={setStore}
+            reset={onReset}
+          />
+        ) : (
           <Link
             tabIndex={-1}
             aria-label="GitHub"
@@ -266,18 +263,18 @@ export default function Page() {
             <Button
               title="GitHub"
               variant="secondary"
-              className="px-3 rounded-full"
+              className="px-3 rounded-full bg-secondary/75"
             >
               <Github />
             </Button>
           </Link>
-        </div>
-      )}
+        )}
+      </div>
       <div
-        className={`fixed max-w-screen-xl flex w-full py-4 px-1.5 top-0 backdrop-blur supports-\[backdrop-filter\]\:bg-background\/60 animate-in transition duration-500 ${
-          activeImage === null || total === 0
-            ? "opacity-0 invisible absolute z-[-1]"
-            : "visible"
+        className={`fixed max-w-screen-xl flex w-full py-4 px-1.5 top-0 backdrop-blur supports-\[backdrop-filter\]\:bg-background\/60 animate-in animate-out transition duration-500 ${
+          !store.enableSlider || activeImage === null || total === 0
+            ? "opacity-0 invisible z-[-1]"
+            : "opacity-100 visible"
         }`}
       >
         <Slider
