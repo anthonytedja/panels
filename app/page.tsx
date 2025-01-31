@@ -134,6 +134,8 @@ export default function Page() {
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
         newActiveImage = Math.max(activeImage - 1, 1);
+      } else {
+        return;
       }
 
       const newActiveImageId = `image-${newActiveImage}`;
@@ -203,7 +205,7 @@ export default function Page() {
 
   return (
     <main
-      className={`flex flex-col justify-center text-center w-full transition-all duration-500 ${
+      className={`flex flex-col justify-center text-center w-full transition-all duration-300 ${
         store.unboundedWidth ? "max-w-full" : "max-w-screen-xl"
       }`}
     >
@@ -222,7 +224,7 @@ export default function Page() {
           </h1>
           <p className="leading-7 mt-6">
             A lightweight{" "}
-            <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold">
+            <code className="rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold">
               .cbr/.cbz/.cbt
             </code>{" "}
             file reader.
@@ -268,7 +270,7 @@ export default function Page() {
             <Button
               title="GitHub"
               variant="secondary"
-              className="px-3 rounded-full bg-secondary/75"
+              className="px-3 rounded-full"
             >
               <Github />
             </Button>
@@ -276,7 +278,7 @@ export default function Page() {
         )}
       </div>
       <div
-        className={`fixed flex w-full py-4 px-1.5 top-0 backdrop-blur supports-\[backdrop-filter\]\:bg-background\/60 transition-all duration-500 ${
+        className={`fixed flex w-full py-4 px-1.5 top-0 backdrop-blur supports-\[backdrop-filter\]\:bg-background\/60 transition-all duration-300 ${
           !store.enableSlider || activeImage === null || total === 0
             ? "opacity-0 invisible"
             : "opacity-100 visible"
