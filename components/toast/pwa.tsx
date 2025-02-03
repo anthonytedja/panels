@@ -26,9 +26,9 @@ export default function PWAPrompt() {
           />
         </svg>{" "}
         & select{" "}
-        <p className="text-xs text-primary-foreground bg-primary py-1.5 px-2.5 rounded-md">
+        <span className="text-xs text-primary-foreground bg-primary py-1.5 px-2.5 rounded-md">
           Add to Home Screen
-        </p>
+        </span>
       </p>
     </>
   );

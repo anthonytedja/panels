@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import PWAPrompt from "@/components/toast/pwa";
@@ -24,25 +24,73 @@ export default function Page() {
   const [enableScrollSpy, setEnableScrollSpy] = useState(false);
   const [fileName, setFileName] = useState("");
   const [store, setStore] = useLocalStorage<Store>("panels-config", {
+    seenPWAPrompt: false,
     enableSlider: false,
     unboundedWidth: false,
   });
 
-  useEffect(() => {
-    const ios =
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
-    const standalone = window.matchMedia("(display-mode: fullscreen)").matches;
+  const onClose = useCallback(() => {
+    setStore({
+      ...store,
+      seenPWAPrompt: true,
+    });
+  }, [store, setStore]);
 
-    if (!initialized.current && !standalone && ios) {
-      initialized.current = true;
-      toast("Add Panels to Home Screen", {
-        duration: 10000,
-        closeButton: true,
-        description: <PWAPrompt />,
-      });
+  const onFileSelected = useCallback(
+    async (e: React.FormEvent<HTMLInputElement>) => {
+      const file = e.currentTarget?.files?.[0];
+      if (!file) return;
+
+      if (inputRef.current) {
+        inputRef.current.value = "";
+      }
+
+      if (
+        ![".cbr", ".cbz", ".cbt"].includes(file.name.slice(-4).toLowerCase())
+      ) {
+        toast.error("Invalid File Type");
+        return;
+      }
+
+      setLoading(true);
+      setFileName(file.name);
+
+      const reader = new FileReader();
+      reader.readAsArrayBuffer(file);
+      reader.onload = function () {
+        workerRef.current?.postMessage(
+          {
+            action: "start",
+            file_name: file.name,
+            array_buffer: reader.result,
+          },
+          [reader.result as ArrayBuffer]
+        );
+      };
+      reader.onerror = function () {
+        toast.error("Error Reading File");
+      };
+    },
+    []
+  );
+
+  const onReset = useCallback(() => {
+    const images = document.getElementById("images");
+    if (!images) return;
+    for (const img of Array.from(images.children)) {
+      URL.revokeObjectURL((img as HTMLImageElement).src);
     }
+    images.innerHTML = "";
+    setHidden(false);
+    setEnableScrollSpy(false);
+    setTotal(0);
+    setFileName("");
+    setSliderValue(1);
+    setActiveImage(null);
+    inputRef.current?.click();
+  }, []);
 
+  useEffect(() => {
     const images = document.getElementById("images");
     workerRef.current = new Worker(
       new URL("../lib/worker.js", import.meta.url)
@@ -92,6 +140,23 @@ export default function Page() {
       workerRef.current?.terminate();
     };
   }, []);
+
+  useEffect(() => {
+    const ios =
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+    const standalone = window.matchMedia("(display-mode: fullscreen)").matches;
+
+    if (!initialized.current && !standalone && ios && !store.seenPWAPrompt) {
+      initialized.current = true;
+      toast("Add Panels to Home Screen", {
+        duration: Infinity,
+        closeButton: true,
+        onDismiss: onClose,
+        description: <PWAPrompt />,
+      });
+    }
+  }, [onClose, store.seenPWAPrompt]);
 
   useEffect(() => {
     if (!enableScrollSpy) return;
@@ -153,55 +218,6 @@ export default function Page() {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [activeImage, enableScrollSpy]);
-
-  const onFileSelected = async (e: React.FormEvent<HTMLInputElement>) => {
-    const file = e.currentTarget?.files?.[0];
-    if (!file) return;
-
-    if (inputRef.current) {
-      inputRef.current.value = "";
-    }
-
-    if (![".cbr", ".cbz", ".cbt"].includes(file.name.slice(-4).toLowerCase())) {
-      toast.error("Invalid File Type");
-      return;
-    }
-
-    setLoading(true);
-    setFileName(file.name);
-
-    const reader = new FileReader();
-    reader.readAsArrayBuffer(file);
-    reader.onload = function () {
-      workerRef.current?.postMessage(
-        {
-          action: "start",
-          file_name: file.name,
-          array_buffer: reader.result,
-        },
-        [reader.result as ArrayBuffer]
-      );
-    };
-    reader.onerror = function () {
-      toast.error("Error Reading File");
-    };
-  };
-
-  const onReset = () => {
-    const images = document.getElementById("images");
-    if (!images) return;
-    for (const img of Array.from(images.children)) {
-      URL.revokeObjectURL((img as HTMLImageElement).src);
-    }
-    images.innerHTML = "";
-    setHidden(false);
-    setEnableScrollSpy(false);
-    setTotal(0);
-    setFileName("");
-    setSliderValue(1);
-    setActiveImage(null);
-    inputRef.current?.click();
-  };
 
   return (
     <main
@@ -289,18 +305,20 @@ export default function Page() {
           min={1}
           max={total}
           value={[sliderValue]}
-          onValueChange={(value) => {
-            setSliderValue(value[0]);
-          }}
-          onValueCommit={(value) => {
-            setActiveImage(value[0]);
-            const newActiveImageId = `image-${value[0]}`;
-            const newActiveImageElement =
-              document.getElementById(newActiveImageId);
-            if (newActiveImageElement) {
-              newActiveImageElement.scrollIntoView();
-            }
-          }}
+          {...(store.enableSlider && {
+            onValueChange: (value: number[]) => {
+              setSliderValue(value[0]);
+            },
+            onValueCommit: (value: number[]) => {
+              setActiveImage(value[0]);
+              const newActiveImageId = `image-${value[0]}`;
+              const newActiveImageElement =
+                document.getElementById(newActiveImageId);
+              if (newActiveImageElement) {
+                newActiveImageElement.scrollIntoView();
+              }
+            },
+          })}
         />
       </div>
       {hidden && (

@@ -17,6 +17,7 @@ export type UncompressMessage =
 
 // Default false when adding new properties
 export type Store = {
+  seenPWAPrompt?: boolean; // Seen PWA Prompt
   enableSlider?: boolean; // Page Progress Slider
   unboundedWidth?: boolean; // Limit Image Width
 };
