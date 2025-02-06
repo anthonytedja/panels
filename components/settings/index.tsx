@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, memo } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -30,7 +30,8 @@ type Props = {
   reset: () => void;
 };
 
-export default function SettingsModal(props: Props) {
+export default memo(SettingsModal);
+function SettingsModal(props: Props) {
   const { name, store, setStore, reset } = props;
   const [open, setOpen] = useState(false);
   const md = useMediaQuery("(min-width: 672px)");
@@ -99,7 +100,7 @@ export default function SettingsModal(props: Props) {
   );
 }
 
-function Body(props: Props & React.ComponentProps<"div">) {
+const Body = memo(function Body(props: Props & React.ComponentProps<"div">) {
   const { store, setStore, reset, className } = props;
 
   return (
@@ -150,12 +151,16 @@ function Body(props: Props & React.ComponentProps<"div">) {
       </div>
     </div>
   );
-}
+});
 
-function Command({ children }: { children: React.ReactNode }) {
+const Command = memo(function Command({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <code className="rounded bg-muted px-[0.4rem] py-[0.2rem] font-mono text-xs">
       {children}
     </code>
   );
-}
+});

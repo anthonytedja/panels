@@ -10,6 +10,7 @@ import { Github, LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 
 import useLocalStorage from "@/hooks/localstorage";
+import useMountTransition from "@/hooks/mounttransition";
 import { Store, UncompressMessage } from "@/types";
 
 export default function Page() {
@@ -17,7 +18,7 @@ export default function Page() {
   const workerRef = useRef<Worker>();
   const inputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(true);
-  const [hidden, setHidden] = useState(false);
+  const [reading, setReading] = useState(false);
   const [activeImage, setActiveImage] = useState<number | null>(null);
   const [sliderValue, setSliderValue] = useState(1);
   const [total, setTotal] = useState(0);
@@ -29,12 +30,20 @@ export default function Page() {
     unboundedWidth: false,
   });
 
+  const showSlider = !!store.enableSlider && total > 0 && activeImage !== null;
+  const sliderMounted = useMountTransition(showSlider, 300);
+
   const onClose = useCallback(() => {
     setStore({
       ...store,
       seenPWAPrompt: true,
     });
   }, [store, setStore]);
+
+  const onClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    inputRef.current?.click();
+  }, []);
 
   const onFileSelected = useCallback(
     async (e: React.FormEvent<HTMLInputElement>) => {
@@ -74,6 +83,19 @@ export default function Page() {
     []
   );
 
+  const onSliderChange = useCallback((value: number[]) => {
+    setSliderValue(value[0]);
+  }, []);
+
+  const onSliderCommit = useCallback((value: number[]) => {
+    setActiveImage(value[0]);
+    const newActiveImageId = `image-${value[0]}`;
+    const newActiveImageElement = document.getElementById(newActiveImageId);
+    if (newActiveImageElement) {
+      newActiveImageElement.scrollIntoView();
+    }
+  }, []);
+
   const onReset = useCallback(() => {
     const images = document.getElementById("images");
     if (!images) return;
@@ -81,7 +103,7 @@ export default function Page() {
       URL.revokeObjectURL((img as HTMLImageElement).src);
     }
     images.innerHTML = "";
-    setHidden(false);
+    setReading(false);
     setEnableScrollSpy(false);
     setTotal(0);
     setFileName("");
@@ -114,7 +136,7 @@ export default function Page() {
           if (index > 3) {
             img.loading = "lazy";
           } else if (index === 1) {
-            setHidden(true);
+            setReading(true);
             setLoading(false);
           }
 
@@ -220,11 +242,7 @@ export default function Page() {
   }, [activeImage, enableScrollSpy]);
 
   return (
-    <main
-      className={`flex flex-col justify-center text-center w-full transition-all duration-300 ${
-        store.unboundedWidth ? "max-w-full" : "max-w-screen-xl"
-      }`}
-    >
+    <>
       <input
         type="file"
         tabIndex={-1}
@@ -233,7 +251,7 @@ export default function Page() {
         accept=".cbr,.cbz,.cbt"
         hidden
       />
-      {!hidden && (
+      {!reading && (
         <div className="flex flex-col items-center p-6">
           <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
             Panels
@@ -248,10 +266,7 @@ export default function Page() {
           <Button
             disabled={loading}
             className={`mt-6 ${loading && "px-2"}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              inputRef.current?.click();
-            }}
+            onClick={onClick}
           >
             {loading ? (
               <LoaderCircle className="animate-spin [&&]:w-6 [&&]:h-6" />
@@ -263,10 +278,13 @@ export default function Page() {
       )}
       <div
         id="images"
-        className={`flex flex-col ${!hidden ? "hidden" : ""}`}
+        suppressHydrationWarning // Local Storage Hydration
+        className={`flex flex-col w-full transition-[max-width] duration-300 ${
+          store.unboundedWidth ? "max-w-full" : "max-w-screen-xl"
+        } ${!reading && "hidden"}`}
       ></div>
       <div className="fixed bottom-4 right-4">
-        {hidden ? (
+        {reading ? (
           <SettingsModal
             name={fileName}
             store={store}
@@ -293,36 +311,24 @@ export default function Page() {
           </Link>
         )}
       </div>
-      <div
-        className={`fixed flex w-full py-4 px-1.5 top-0 backdrop-blur supports-\[backdrop-filter\]\:bg-background\/60 transition-all duration-300 ${
-          !store.enableSlider || activeImage === null || total === 0
-            ? "opacity-0 invisible"
-            : "opacity-100 visible"
-        } ${store.unboundedWidth ? "max-w-full" : "max-w-screen-xl"}`}
-      >
-        <Slider
-          step={1}
-          min={1}
-          max={total}
-          value={[sliderValue]}
-          {...(store.enableSlider && {
-            onValueChange: (value: number[]) => {
-              setSliderValue(value[0]);
-            },
-            onValueCommit: (value: number[]) => {
-              setActiveImage(value[0]);
-              const newActiveImageId = `image-${value[0]}`;
-              const newActiveImageElement =
-                document.getElementById(newActiveImageId);
-              if (newActiveImageElement) {
-                newActiveImageElement.scrollIntoView();
-              }
-            },
-          })}
-        />
-      </div>
-      {hidden && (
+      {reading && (
         <>
+          {(sliderMounted || showSlider) && (
+            <div
+              className={`slider backdrop-blur supports-\[backdrop-filter\]\:bg-background\/60 ${
+                sliderMounted && showSlider && "active"
+              } ${store.unboundedWidth ? "max-w-full" : "max-w-screen-xl"}`}
+            >
+              <Slider
+                step={1}
+                min={1}
+                max={total}
+                value={[sliderValue]}
+                onValueChange={onSliderChange}
+                onValueCommit={onSliderCommit}
+              />
+            </div>
+          )}
           <div className="flex justify-center break-words">
             <p className="text-xs bg-muted py-2 px-3 mx-2 border-[1px] border-t-0 border-primary/25 rounded-b-lg">
               {fileName}
@@ -333,6 +339,6 @@ export default function Page() {
           </div>
         </>
       )}
-    </main>
+    </>
   );
 }

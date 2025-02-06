@@ -18,6 +18,20 @@ img,
   -webkit-touch-callout: none;
 }
 
+.slider {
+  position: fixed;
+  top: 0;
+  display: flex;
+  width: 100%;
+  padding: 1rem 0.375rem;
+  opacity: 0;
+  transition: all ease 0.3s;
+}
+
+.slider.active {
+  opacity: 1;
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;

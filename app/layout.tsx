@@ -41,7 +41,9 @@ export default function RootLayout({
           swipeDirections={["left", "right"]}
         />
         <div className="flex justify-center items-center min-h-dvh">
-          {children}
+          <main className="flex flex-col items-center text-center w-full">
+            {children}
+          </main>
         </div>
       </body>
     </html>
