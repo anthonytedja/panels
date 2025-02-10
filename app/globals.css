@@ -18,6 +18,14 @@ img,
   -webkit-touch-callout: none;
 }
 
+code {
+  @apply rounded bg-muted px-[0.4rem] py-[0.2rem] font-mono text-xs;
+}
+
+label {
+  @apply text-sm font-medium leading-none select-none w-full cursor-pointer peer-disabled:cursor-not-allowed peer-disabled:opacity-70;
+}
+
 .slider {
   position: fixed;
   top: 0;

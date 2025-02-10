@@ -16,7 +16,6 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import useMediaQuery from "@/hooks/mediaquery";
 import { Settings } from "lucide-react";
@@ -100,7 +99,7 @@ function SettingsModal(props: Props) {
   );
 }
 
-const Body = memo(function Body(props: Props & React.ComponentProps<"div">) {
+function Body(props: Props & React.ComponentProps<"div">) {
   const { store, setStore, reset, className } = props;
 
   return (
@@ -110,9 +109,7 @@ const Body = memo(function Body(props: Props & React.ComponentProps<"div">) {
       </Button>
       <hr className="border-t border-secondary" />
       <div className="flex justify-between items-center gap-2">
-        <Label htmlFor="enable-slider" className="w-full cursor-pointer">
-          Page Progress Slider
-        </Label>
+        <label htmlFor="enable-slider">Page Progress Slider</label>
         <Switch
           id="enable-slider"
           checked={store.enableSlider}
@@ -122,9 +119,7 @@ const Body = memo(function Body(props: Props & React.ComponentProps<"div">) {
         />
       </div>
       <div className="flex justify-between items-center gap-2">
-        <Label htmlFor="limit-width" className="w-full cursor-pointer">
-          Unlimit Image Width (Desktop)
-        </Label>
+        <label htmlFor="limit-width">Unlimit Image Width (Desktop)</label>
         <Switch
           id="limit-width"
           checked={store.unboundedWidth}
@@ -138,29 +133,16 @@ const Body = memo(function Body(props: Props & React.ComponentProps<"div">) {
         <h3 className="text-sm font-semibold mb-4">Keyboard Shortcuts</h3>
         <ul className="text-sm font-medium flex flex-col gap-3">
           <li>
-            <Command>Arrow Down</Command> or <Command>Space</Command> : Next
-            Page
+            <code>Arrow Down</code> or <code>Space</code> : Next Page
           </li>
           <li>
-            <Command>Arrow Up</Command> : Prev Page
+            <code>Arrow Up</code> or <code>Space + Shift</code>: Prev Page
           </li>
           <li>
-            <Command>S</Command> : Show / Hide Settings
+            <code>S</code> : Show / Hide Settings
           </li>
         </ul>
       </div>
     </div>
   );
-});
-
-const Command = memo(function Command({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <code className="rounded bg-muted px-[0.4rem] py-[0.2rem] font-mono text-xs">
-      {children}
-    </code>
-  );
-});
+}

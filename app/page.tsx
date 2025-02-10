@@ -215,10 +215,10 @@ export default function Page() {
       const imageElements = document.querySelectorAll("#images img");
       let newActiveImage = activeImage;
 
-      if (e.key === "ArrowDown" || e.key === " ") {
+      if (e.key === "ArrowDown" || (e.key === " " && !e.shiftKey)) {
         e.preventDefault();
         newActiveImage = Math.min(activeImage + 1, imageElements.length);
-      } else if (e.key === "ArrowUp") {
+      } else if (e.key === "ArrowUp" || (e.key === " " && e.shiftKey)) {
         e.preventDefault();
         newActiveImage = Math.max(activeImage - 1, 1);
       } else {
@@ -258,10 +258,8 @@ export default function Page() {
           </h1>
           <p className="leading-7 mt-6">
             A lightweight{" "}
-            <code className="rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold">
-              .cbr/.cbz/.cbt
-            </code>{" "}
-            file reader.
+            <code className="text-sm font-semibold">.cbr/.cbz/.cbt</code> file
+            reader.
           </p>
           <Button
             disabled={loading}
